@@ -3,7 +3,8 @@
 // Example: https://truthsleuth-backend.onrender.com/api/check
 // ==================================================
 
-const API_URL = "https://truth-sleuth-backend.onrender.com/analyze"; // your Render backend URL
+// ✅ Backend API endpoint (Render)
+const API_URL = "https://truth-sleuth-backend.onrender.com/analyze";
 
 document.getElementById('analyzeBtn').addEventListener('click', analyze);
 
@@ -24,31 +25,32 @@ async function analyze() {
       body: JSON.stringify({ text: input })
     });
 
-    const data = await res.json();
-
-    if (data.error) {
-      resultDiv.textContent = "Error: " + data.error;
-      return;
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status}`);
     }
 
-    // Format the backend response nicely
-    const output = `
-      🧠 Credibility Score: ${data.score ?? "N/A"}/100
-      🏷️ Classification: ${data.classification ?? "N/A"}
-      🔍 Indicators:
-      - ${(data.indicators || []).join('\n- ') || "None"}
+    const data = await res.json();
 
-      ⚠️ Concerns:
-      - ${(data.concerns || []).join('\n- ') || "None"}
-
-      💬 Reasoning:
-      ${data.reasoning || "No reasoning provided."}
-    `;
-
-    resultDiv.textContent = output;
+    // ✅ Handle valid backend response
+    if (data.score !== undefined && data.classification) {
+      resultDiv.innerHTML = `
+        <h3>Credibility Score: ${data.score}/100</h3>
+        <p><strong>Classification:</strong> ${data.classification}</p>
+        <p><strong>Reasoning:</strong> ${data.reasoning}</p>
+        <p><strong>Key Indicators:</strong></p>
+        <ul>${data.indicators.map(i => `<li>${i}</li>`).join('')}</ul>
+        <p><strong>Concerns:</strong></p>
+        <ul>${data.concerns.map(c => `<li>${c}</li>`).join('')}</ul>
+      `;
+    } else if (data.error) {
+      resultDiv.textContent = "Error: " + data.error;
+    } else {
+      resultDiv.textContent = "Unexpected response format. Please try again.";
+    }
 
   } catch (err) {
     console.error(err);
     resultDiv.textContent = "Could not connect to backend. Make sure the backend URL is correct and CORS is enabled.";
   }
 }
+
