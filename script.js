@@ -3,7 +3,7 @@
 // Example: https://truthsleuth-backend.onrender.com/api/check
 // ==================================================
 
-const API_URL = "https://truth-sleuth-backend.onrender.com/analyze"; // <-- replace this with your backend URL
+const API_URL = "https://truth-sleuth-backend.onrender.com/analyze"; // your Render backend URL
 
 document.getElementById('analyzeBtn').addEventListener('click', analyze);
 
@@ -25,13 +25,28 @@ async function analyze() {
     });
 
     const data = await res.json();
-    if (data.assessment) {
-      resultDiv.textContent = data.assessment;
-    } else if (data.error) {
-      resultDiv.textContent = "Error: " + (data.error || JSON.stringify(data));
-    } else {
-      resultDiv.textContent = "Unexpected response: " + JSON.stringify(data);
+
+    if (data.error) {
+      resultDiv.textContent = "Error: " + data.error;
+      return;
     }
+
+    // Format the backend response nicely
+    const output = `
+      🧠 Credibility Score: ${data.score ?? "N/A"}/100
+      🏷️ Classification: ${data.classification ?? "N/A"}
+      🔍 Indicators:
+      - ${(data.indicators || []).join('\n- ') || "None"}
+
+      ⚠️ Concerns:
+      - ${(data.concerns || []).join('\n- ') || "None"}
+
+      💬 Reasoning:
+      ${data.reasoning || "No reasoning provided."}
+    `;
+
+    resultDiv.textContent = output;
+
   } catch (err) {
     console.error(err);
     resultDiv.textContent = "Could not connect to backend. Make sure the backend URL is correct and CORS is enabled.";
