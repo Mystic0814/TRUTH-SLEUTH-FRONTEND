@@ -3,7 +3,7 @@
 // Example: https://truthsleuth-backend.onrender.com/api/check
 // ==================================================
 
-const API_URL = "https://truthsleuth-backend.onrender.com/api/check"; // <-- replace this with your backend URL
+const API_URL = "https://truth-sleuth-backend.onrender.com/analyze"; // <-- replace this with your backend URL
 
 document.getElementById('analyzeBtn').addEventListener('click', analyze);
 
